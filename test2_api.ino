@@ -28,31 +28,61 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "API OK");
   });
 
-  server.on("/on", HTTP_GET, [](AsyncWebServerRequest *request){
-    led_state = true;
-    digitalWrite(LED_PIN, HIGH);
-    request->send(200, "text/plain", "LED ON");
-  });
-
+  //les routes de controle LED
   server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request){
     led_state = false;
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(LED_PIN, HIGH);
     request->send(200, "text/plain", "LED OFF");
+  });
+
+  server.on("/on", HTTP_GET, [](AsyncWebServerRequest *request){
+    led_state = true;
+    digitalWrite(LED_PIN, LOW);
+    request->send(200, "text/plain", "LED ON");
   });
 
   server.on("/toggle", HTTP_GET, [](AsyncWebServerRequest *request){
     led_state = !led_state;
-    digitalWrite(LED_PIN, led_state ? HIGH : LOW);
-    request->send(200, "text/plain", led_state ? "LED ON" : "LED OFF");
+    digitalWrite(LED_PIN, led_state ? LOW : HIGH);
+    request->send(200, "text/plain", led_state ? "LED OFF" : "LED ON");
   });
 
   server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", led_state ? "LED is ON" : "LED is OFF");
+    request->send(200, "text/plain", led_state ? "LED est ON" : "LED est OFF");
+  });
+ 
+
+  server.on("/control", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/html", R"rawliteral(
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>LED Control</title>
+      </head>
+      <body>
+        <h2>Control LED</h2>
+        <button onclick="fetch('/on')">Allumer</button>
+        <button onclick="fetch('/off')">Eteindre</button>
+        <button onclick="fetch('/toggle')">Basculer</button>
+        <button onclick="checkStatus()">Etat</button>
+        <p id="status"></p>
+
+        <script>
+          function checkStatus() {
+            fetch('/status')
+              .then(response => response.text())
+              .then(data => {
+                document.getElementById('status').innerText = data;
+              });
+          }
+        </script>
+      </body>
+      </html>
+    )rawliteral");
   });
 
   server.begin();
