@@ -2,4 +2,5 @@
 #include <Arduino.h>
 
 void initLED(int pin);
-void setLEDState(int pin, bool state);
+void setLEDState(int pin, bool on);
+bool getLEDState(int pin);

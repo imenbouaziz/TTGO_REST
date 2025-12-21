@@ -1,9 +1,19 @@
-#include "led_controller.h"
+#include "led_control.h"
+
+static int ledPin = -1;
 
 void initLED(int pin) {
-    pinMode(pin, OUTPUT);
+  ledPin = pin;
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);
 }
 
-void setLEDState(int pin, bool state) {
-    digitalWrite(pin, state ? HIGH : LOW);
+void setLEDState(int pin, bool on) {
+  ledPin = pin;
+  digitalWrite(pin, on ? HIGH : LOW);
+}
+
+bool getLEDState(int pin) {
+  if (ledPin != pin) return false;
+  return digitalRead(pin) == HIGH;
 }
